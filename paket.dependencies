@@ -1,6 +1,11 @@
+storage: none
+framework: net6.0
 source https://api.nuget.org/v3/index.json
 
-storage: none
-framework: net5.0, netstandard2.0, netstandard2.1
+nuget FSharp.Core
 nuget FSharp.Data
 nuget SQLProvider
+nuget npgsql ~> 6
+nuget Microsoft.Extensions.Logging
+nuget Microsoft.Extensions.Hosting
+nuget Microsoft.AspNetCore.Hosting

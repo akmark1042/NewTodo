@@ -1,0 +1,5 @@
+{
+  "connection": "User ID=todo;Password=todo;Host=localhost;Database=todo;",
+  "migrationsDir": "./migrations//",
+  "driver": "postgres"
+}

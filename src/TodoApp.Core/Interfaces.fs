@@ -1,12 +1,15 @@
 [<AutoOpen>]
 module TodoApp.Core.Interfaces
 
+open System
+
 open TodoApp.Core.Types
 
 type ITodoStore =
-    abstract clean: List<TodoItem> -> List<TodoItem>
-    abstract add: List<TodoItem> -> string -> List<TodoItem>
-    abstract listAll: List<TodoItem> -> List<TodoItem>
-    abstract get: List<TodoItem> -> int -> List<TodoItem>
-    abstract toggle: List<TodoItem> -> int -> List<TodoItem>
-    abstract help: unit -> unit
+    abstract clean: unit -> unit
+    abstract add: string -> TodoItem
+    abstract getAll: unit -> TodoItem list
+    abstract get: Guid -> TodoItem option
+    abstract toggle: Guid -> ToggleError option
+    abstract getByIndex: int -> TodoItem option
+    

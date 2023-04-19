@@ -1,20 +1,21 @@
 [<AutoOpen>]
 module TodoApp.Core.Default
 
-let clean (store: ITodoStore) loopToken =
-     store.clean loopToken
+let clean (store: ITodoStore) =
+     store.clean()
 
-let add (store: ITodoStore) loopToken name =
-     store.add loopToken name
+let add (store: ITodoStore) name =
+     store.add name
 
-let listAll (store: ITodoStore) loopToken =
-    loopToken
+let getAll (store: ITodoStore) =
+    store.getAll()
 
-let get (store: ITodoStore) loopToken num =
-     store.get loopToken num
+let get (store: ITodoStore) idx =
+     store.getByIndex idx
 
-let toggle (store: ITodoStore) loopToken num =
-     store.toggle loopToken num
-
-let help (store: ITodoStore) =
-     store.help()
+let toggle (store: ITodoStore) idx =
+     let mItem = store.getByIndex idx
+     match mItem with
+     | None -> ToggleError.IndexNotFound idx |> Some
+     | Some i ->
+          i |> TodoItem.getId |> store.toggle

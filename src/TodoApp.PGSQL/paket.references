@@ -1,0 +1,7 @@
+FSharp.Core
+FSharp.Data
+SQLProvider
+npgsql
+Microsoft.Extensions.Logging
+Microsoft.Extensions.Hosting
+Microsoft.AspNetCore.Hosting

@@ -1,16 +1,36 @@
 module NewTodo.Store
 
-open TodoApp.Core.Interfaces
+open System
+open System.IO
 
 open FSharp.Data
 
-open System
-open System.IO
+open TodoApp.Core.Interfaces
+open TodoApp.Core.Types
 
 [<Literal>]
 let resolutionFolder = __SOURCE_DIRECTORY__
 
 type Todos = CsvProvider<"..\\TodoApp.CSV\\template.csv", ResolutionFolder=resolutionFolder>
+
+//Type conversion
+[<RequireQualifiedAccess>]
+module TodoItem =
+    let ofRow (row:Todos.Row) =
+        match row.Date with
+        | Some date ->
+            {
+                Id = row.Id
+                Label = row.Label
+                CompletedDate = date
+            }
+            |> Complete
+        | None -> 
+            {
+                Id = row.Id
+                Label = row.Label
+            }
+            |> Incomplete
 
 type TodoCsvStore (path: string) =
     let saveFile (todos:Runtime.CsvFile<Todos.Row>) =
@@ -25,51 +45,49 @@ type TodoCsvStore (path: string) =
             | ex -> new Todos([])
 
     interface ITodoStore with
-        member this.add unusedLoopToken name =            
-            let myCsv = loadFile()
-            let myCSVwithExtraRows = myCsv.Append [ Todos.Row(name, None) ]
+        member this.add name =
+            let newToDoItem = Todos.Row(Guid.NewGuid(), name, None)
+            let myCSVwithExtraRows = loadFile().Append [ newToDoItem ]
             saveFile myCSVwithExtraRows
-            unusedLoopToken
+            newToDoItem |> TodoItem.ofRow
         
-        member this.toggle unusedLoopToken num =
-            let listAllCsv = loadFile()
-            let gotItem = listAllCsv.Rows |> Seq.toList |> List.tryItem num
-            printfn "%A" gotItem
-            
-            let newCsv =
-                match gotItem with
-                | Some item ->
-                    match item.Label, item.Date with
-                    | _, Some a -> Todos.Row(item.Label, None)
-                    | _, _ -> Todos.Row(item.Label, Some DateTimeOffset.Now)
-                | None -> gotItem.Value
-            
-            let appended = listAllCsv.Rows |> Seq.updateAt num newCsv |> (fun t -> new Todos(t))
+        member this.toggle id =
+            let items = loadFile()
 
-            saveFile appended
-            unusedLoopToken
+            let mIndex =
+                items.Rows
+                |> Seq.tryFindIndex (fun i -> i.Id = id)
             
-        member this.listAll unusedLoopToken =
-            let listAllCsv = loadFile()
-            listAllCsv.Rows |> Seq.toList |> List.iter (fun row -> printfn "%A" row)
-            unusedLoopToken
-        
-        member this.clean unusedLoopToken =
+            match mIndex with
+            | None -> ToggleError.ItemNotFound id |> Some
+            | Some i ->
+                let item = items.Rows |> Seq.item i
+
+                let item' =
+                    match item.Date with
+                    | Some _ -> Todos.Row(id, item.Label, None)
+                    | None -> Todos.Row(id, item.Label, Some DateTimeOffset.Now)
+
+                let appended = items.Rows |> Seq.updateAt i item' |> (fun t -> new Todos(t))
+
+                saveFile appended
+                None
+            
+        member this.getAll() =
+            loadFile().Rows
+            |> Seq.toList
+            |> List.map TodoItem.ofRow
+            
+        member this.clean() =
             let listToClean = loadFile().Rows |> Seq.filter (fun row -> row.Date = None) |> (fun t -> new Todos(t))
             saveFile listToClean
 
-            unusedLoopToken
-
-        member this.get unusedLoopToken num =
-            let listAllCsv = loadFile()
-            printfn "%A" (listAllCsv.Rows |> Seq.toList |> List.tryItem num)
-            unusedLoopToken
-        
-        member this.help() =
-            printfn "Type 'add' (name) to add an item."
-            printfn "Type 'get' # (number) to retrieve an item."
-            printfn "Type 'list all' to retrieve all existing items."
-            printfn "Type 'clean' to remove completed Todo items."
-            printfn "Type 'toggle' # to indicate item completion."
-            printfn "Type 'exit' to end the program."
-            printfn "Type an instruction: "
+        member this.get id =
+            loadFile().Rows
+            |> Seq.tryFind (fun row -> row.Id = id)
+            |> Option.map TodoItem.ofRow
+            
+        member this.getByIndex id =
+            loadFile().Rows
+            |> Seq.tryItem id
+            |> Option.map TodoItem.ofRow

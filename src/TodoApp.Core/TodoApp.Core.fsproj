@@ -9,7 +9,6 @@
     <Compile Include="Types.fs" />
     <Compile Include="Interfaces.fs" />
     <Compile Include="Default.fs" />
-    <Compile Include="Library.fs" />
   </ItemGroup>
 
 </Project>
