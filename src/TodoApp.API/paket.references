@@ -1,0 +1,6 @@
+FSharp.Core
+Giraffe
+Serilog
+Serilog.AspNetCore
+Serilog.Sinks.ElasticSearch
+Serilog.Enrichers.Environment

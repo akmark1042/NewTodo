@@ -1,4 +1,4 @@
-﻿module NewTodo.Program
+﻿module TodoApp.PGSQL.Program
 
 open System
 
@@ -10,8 +10,8 @@ open Microsoft.Extensions.Options
 
 open TodoApp.Core
 
-open NewTodo.Database
-open NewTodo.Store
+open TodoApp.DataAccess.Database
+open TodoApp.PGSQL.Store
 
 open FSharp.Data.Sql
 
@@ -47,40 +47,46 @@ let withServices bldr =
             .AddScoped<ITodoStore,TodoStore>()
     )
 
-let rec todLoop (store: ITodoStore) =
-    let command = Console.ReadLine()
+let rec todoLoopAsync (store: ITodoStore) =
+    async {
+        let command = Console.ReadLine()
 
-    match command with
-    | Help ->
-        help()
-        todLoop store
-    | Add a ->
-        add store a |> ignore
-        todLoop store
-    | Get g ->
-        get store g |> printfn "%A"
-        todLoop store
-    | ListAll a ->
-        getAll store |> printfn "%A"
-        todLoop store
-    | Clean _ ->
-        clean store
-        todLoop store
-    | Toggle t ->
-        toggle store t |> ignore
-        todLoop store
-    | Exit _ -> exit(0)
-    | _ -> todLoop store
+        match command with
+        | Help ->
+            help()
+            return! todoLoopAsync store
+        | Add a ->
+            do! addAsync store a |> Async.Ignore
+            return! todoLoopAsync store
+        | Get g ->
+            let! retItem = getAsync store g
+            printfn "%A" retItem
+            return! todoLoopAsync store
+        | ListAll a ->
+            let! retItem = getAllAsync store
+            printfn "%A" retItem
+            return! todoLoopAsync store
+        | Clean _ ->
+            do! cleanAsync store
+            return! todoLoopAsync store
+        | Toggle t ->
+            do! toggleAsync store t |> Async.Ignore
+            return! todoLoopAsync store
+        | Exit _ -> exit(0)
+        | _ -> return! todoLoopAsync store
+    }
 
 [<EntryPoint>]
 let main args =
-    let host =
-        Host.CreateDefaultBuilder(args)
-        |> withServices
-        |> build
+    async {
+        let host =
+            Host.CreateDefaultBuilder(args)
+            |> withServices
+            |> build
 
-    let store = host.Services.GetRequiredService<ITodoStore>()
-    help()
-    todLoop store
+        let store = host.Services.GetRequiredService<ITodoStore>()
+        help()
+        do! todoLoopAsync store
 
-    0
+        return 0
+    } |> Async.RunSynchronously

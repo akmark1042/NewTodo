@@ -1,21 +1,23 @@
 [<AutoOpen>]
 module TodoApp.Core.Default
 
-let clean (store: ITodoStore) =
-     store.clean()
+let cleanAsync (store: ITodoStore) =
+     store.cleanAsync()
 
-let add (store: ITodoStore) name =
-     store.add name
+let addAsync (store: ITodoStore) name =
+     store.addAsync name
 
-let getAll (store: ITodoStore) =
-    store.getAll()
+let getAllAsync (store: ITodoStore)=
+     store.getAllAsync()
 
-let get (store: ITodoStore) idx =
-     store.getByIndex idx
+let getAsync (store: ITodoStore) idx =
+     store.getByIndexAsync idx
 
-let toggle (store: ITodoStore) idx =
-     let mItem = store.getByIndex idx
-     match mItem with
-     | None -> ToggleError.IndexNotFound idx |> Some
-     | Some i ->
-          i |> TodoItem.getId |> store.toggle
+let toggleAsync (store: ITodoStore) idx =
+     async {
+          let! mItem = store.getByIndexAsync idx
+          match mItem with
+          | None -> return ToggleError.IndexNotFound idx |> Some
+          | Some i ->
+               return! i |> TodoItem.getId |> store.toggleAsync
+     }

@@ -34,7 +34,6 @@ type ToggleError =
     | ItemNotFound of Guid
     | IndexNotFound of int
 
-
 //Partial active patterns
 let (|Help|_|) (command: string) =
     match command with

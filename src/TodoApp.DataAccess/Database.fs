@@ -1,4 +1,5 @@
-module NewTodo.Database
+[<AutoOpen>]
+module TodoApp.DataAccess.Database
 
 open FSharp.Data.Sql
 
@@ -19,7 +20,3 @@ type TodoDb = SqlDataProvider<
     ConnectionString = connString,
     UseOptionTypes = useOptionTypes,
     ContextSchemaPath = contextSchemaPath >
-
-// Uncomment to save schema
-// let ctx = TodoDb.GetDataContext()
-// ctx.``Design Time Commands``.SaveContextSchema

@@ -9,3 +9,12 @@ nuget npgsql ~> 6
 nuget Microsoft.Extensions.Logging
 nuget Microsoft.Extensions.Hosting
 nuget Microsoft.AspNetCore.Hosting
+nuget Giraffe ~> 6.0.0
+nuget Microsoft.NET.Test.Sdk
+nuget Microsoft.AspNetCore.TestHost
+nuget xunit
+nuget xunit.runner.visualstudio
+nuget Serilog ~> 2.10
+nuget Serilog.AspNetCore ~> 4.1
+nuget Serilog.Sinks.ElasticSearch ~> 8.4
+nuget Serilog.Enrichers.Environment ~> 2.2

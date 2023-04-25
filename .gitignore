@@ -1,4 +1,18 @@
-# Paket
-   .paket/
-   paket-files/
+# Editors
+.idea/
+.vscode/
+.vs/
+.ionide/
 .fake
+*.user
+
+# Paket
+paket-files/
+
+# Dotnet builds
+bin/
+obj/
+
+# Secrets
+appsettings.*.json
+migrondi.*.json

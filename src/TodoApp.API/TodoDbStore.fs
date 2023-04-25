@@ -1,4 +1,4 @@
-module TodoApp.PGSQL.Store
+module TodoApp.TodoDbStore
 
 open System
 
@@ -29,17 +29,17 @@ module TodoItem =
 type TodoStore (context:TodoDb.dataContext) =
     interface ITodoStore with
         member this.getAllAsync() =
-            async {
-                let! result =
-                    query {
-                        for row in context.Public.Todo do
-                        sortBy row.CreatedAt
-                    }
-                    |> Seq.executeQueryAsync
-                    |> Async.AwaitTask
+            let wholeList() = async {
+                    let result =
+                        query {
+                            for row in context.Public.Todo do
+                            sortBy row.CreatedAt
+                        }
+                        |> Seq.map TodoItem.ofRow
+                        |> Seq.toList
 
-                return result |> Seq.map TodoItem.ofRow |> Seq.toList
-            }
+                    return result }
+            wholeList()
                     
         member this.cleanAsync() =
             let cleanedList() = async {
@@ -78,10 +78,11 @@ type TodoStore (context:TodoDb.dataContext) =
                         context.SubmitUpdates()
                         None
                     | None -> ToggleError.ItemNotFound id |> Some
+                
                 return result }
             
             toggled()
-                        
+            
         member this.addAsync name =
             let newAdd() = async {
                 let newRow = context.Public.Todo.Create()
@@ -101,16 +102,16 @@ type TodoStore (context:TodoDb.dataContext) =
         
         member this.getAsync id =
             let byId() = async {
-                let! result =
+                let result =
                     query {
                         for row in context.Public.Todo do
                         where (row.Id = id)
                     }
-                    |> Seq.tryExactlyOneAsync
-                    |> Async.AwaitTask
-
-                return result |> Option.map TodoItem.ofRow }
-
+                    |> Seq.tryExactlyOne
+                    |> Option.map TodoItem.ofRow
+                
+                return result }
+            
             byId()
 
         member this.getByIndexAsync id =
@@ -123,8 +124,6 @@ type TodoStore (context:TodoDb.dataContext) =
                     |> Seq.map TodoItem.ofRow
                     |> Seq.toList
 
-                let result = allList |> List.tryItem id
-                
-                return result}
+                return allList |> List.tryItem id }
             
             byIndex()

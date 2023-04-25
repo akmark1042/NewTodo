@@ -6,10 +6,9 @@ open System
 open TodoApp.Core.Types
 
 type ITodoStore =
-    abstract clean: unit -> unit
-    abstract add: string -> TodoItem
-    abstract getAll: unit -> TodoItem list
-    abstract get: Guid -> TodoItem option
-    abstract toggle: Guid -> ToggleError option
-    abstract getByIndex: int -> TodoItem option
-    
+    abstract cleanAsync: unit -> Async<unit>
+    abstract addAsync: string -> Async<TodoItem>
+    abstract getAllAsync: unit -> Async<TodoItem list>
+    abstract getAsync: Guid -> Async<TodoItem option>
+    abstract toggleAsync: Guid -> Async<ToggleError option>
+    abstract getByIndexAsync: int -> Async<TodoItem option>

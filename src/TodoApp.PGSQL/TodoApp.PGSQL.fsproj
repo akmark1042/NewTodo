@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Database.fs" />
     <Compile Include="TodoDbStore.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -18,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TodoApp.Core\TodoApp.Core.fsproj" />
+    <ProjectReference Include="..\TodoApp.DataAccess\TodoApp.DataAccess.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

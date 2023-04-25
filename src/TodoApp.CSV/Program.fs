@@ -1,39 +1,45 @@
-﻿module NewTodo.Program
+﻿module TodoApp.CSV.program
 
 open System
 
 open TodoApp.Core
 
-open NewTodo.Store
+open TodoApp.CSV.Store
 
-let rec todoLoop (store: TodoCsvStore) =
-    let command = Console.ReadLine()
-    
-    match command with
-    | Help ->
-        help()
-        todoLoop store
-    | Add a ->
-        add store a |> ignore
-        todoLoop store
-    | Get g ->
-        get store g |> printfn "%A"
-        todoLoop store
-    | ListAll a ->
-        getAll store |> printfn "%A"
-        todoLoop store
-    | Clean c ->
-        clean store
-        todoLoop store
-    | Toggle t ->
-        toggle store t |> ignore
-        todoLoop store
-    | Exit e -> exit(0)
-    | _ -> todoLoop store
+let rec todoLoopAsync (store: TodoCsvStore) =
+    async {
+        let command = Console.ReadLine()
+        
+        match command with
+        | Help ->
+            help()
+            return! todoLoopAsync store
+        | Add a ->
+            do! addAsync store a |> Async.Ignore
+            return! todoLoopAsync store
+        | Get g ->
+            let! gotItem = getAsync store g
+            printfn "%A" gotItem
+            return! todoLoopAsync store
+        | ListAll a ->
+            let! allItems = getAllAsync store
+            printfn "%A" allItems
+            return! todoLoopAsync store
+        | Clean c ->
+            do! cleanAsync store
+            return! todoLoopAsync store
+        | Toggle t ->
+            do! toggleAsync store t |> Async.Ignore
+            return! todoLoopAsync store
+        | Exit e -> exit(0)
+        | _ -> return! todoLoopAsync store
+    }
 
 [<EntryPoint>]
 let main args =
-    let store = new TodoCsvStore("todoappstore.csv")
-    help()
-    todoLoop store []
-    0
+    async {
+        let store = new TodoCsvStore("todoappstore.csv")
+        help()
+        do! todoLoopAsync store
+        return 0
+    } |> Async.RunSynchronously

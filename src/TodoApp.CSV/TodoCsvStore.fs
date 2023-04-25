@@ -1,4 +1,4 @@
-module NewTodo.Store
+module TodoApp.CSV.Store
 
 open System
 open System.IO
@@ -45,49 +45,73 @@ type TodoCsvStore (path: string) =
             | ex -> new Todos([])
 
     interface ITodoStore with
-        member this.add name =
-            let newToDoItem = Todos.Row(Guid.NewGuid(), name, None)
-            let myCSVwithExtraRows = loadFile().Append [ newToDoItem ]
-            saveFile myCSVwithExtraRows
-            newToDoItem |> TodoItem.ofRow
+        member this.addAsync name =
+            let newAdd() = async {
+                let result = 
+                    let newToDoItem = Todos.Row(Guid.NewGuid(), name, None)
+                    let myCSVwithExtraRows = loadFile().Append [ newToDoItem ]
+                    saveFile myCSVwithExtraRows
+                    newToDoItem |> TodoItem.ofRow
+                
+                return result }
+
+            newAdd()
         
-        member this.toggle id =
-            let items = loadFile()
+        member this.toggleAsync id =
+            let toggled() = async {
+                let result =
+                    let items = loadFile()
 
-            let mIndex =
-                items.Rows
-                |> Seq.tryFindIndex (fun i -> i.Id = id)
+                    let mIndex =
+                        items.Rows
+                        |> Seq.tryFindIndex (fun i -> i.Id = id)
+                    
+                    match mIndex with
+                    | None -> ToggleError.ItemNotFound id |> Some
+                    | Some i ->
+                        let item = items.Rows |> Seq.item i
+
+                        let item' =
+                            match item.Date with
+                            | Some _ -> Todos.Row(id, item.Label, None)
+                            | None -> Todos.Row(id, item.Label, Some DateTimeOffset.Now)
+
+                        let appended = items.Rows |> Seq.updateAt i item' |> (fun t -> new Todos(t))
+
+                        saveFile appended
+                        None
+
+                return result }
+
+            toggled()
+
+        member this.getAllAsync() =
+            let wholeList() = async {
+                return loadFile().Rows
+                |> Seq.toList
+                |> List.map TodoItem.ofRow }
+
+            wholeList()
+                    
+        member this.cleanAsync() =
+            let cleanedList() = async {
+                let listToClean = loadFile().Rows |> Seq.filter (fun row -> row.Date = None) |> (fun t -> new Todos(t))
+                saveFile listToClean }
+
+            cleanedList()
+
+        member this.getAsync id =
+            let byId() = async {
+                return loadFile().Rows
+                |> Seq.tryFind (fun row -> row.Id = id)
+                |> Option.map TodoItem.ofRow }
             
-            match mIndex with
-            | None -> ToggleError.ItemNotFound id |> Some
-            | Some i ->
-                let item = items.Rows |> Seq.item i
-
-                let item' =
-                    match item.Date with
-                    | Some _ -> Todos.Row(id, item.Label, None)
-                    | None -> Todos.Row(id, item.Label, Some DateTimeOffset.Now)
-
-                let appended = items.Rows |> Seq.updateAt i item' |> (fun t -> new Todos(t))
-
-                saveFile appended
-                None
+            byId()
             
-        member this.getAll() =
-            loadFile().Rows
-            |> Seq.toList
-            |> List.map TodoItem.ofRow
+        member this.getByIndexAsync id =
+            let byIndex() = async {
+                return loadFile().Rows
+                |> Seq.tryItem id
+                |> Option.map TodoItem.ofRow }
             
-        member this.clean() =
-            let listToClean = loadFile().Rows |> Seq.filter (fun row -> row.Date = None) |> (fun t -> new Todos(t))
-            saveFile listToClean
-
-        member this.get id =
-            loadFile().Rows
-            |> Seq.tryFind (fun row -> row.Id = id)
-            |> Option.map TodoItem.ofRow
-            
-        member this.getByIndex id =
-            loadFile().Rows
-            |> Seq.tryItem id
-            |> Option.map TodoItem.ofRow
+            byIndex()

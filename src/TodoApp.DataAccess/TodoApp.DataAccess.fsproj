@@ -6,9 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Types.fs" />
-    <Compile Include="Interfaces.fs" />
-    <Compile Include="Default.fs" />
+    <Compile Include="Database.fs" />
   </ItemGroup>
+    <ItemGroup>
+    <ProjectReference Include="..\TodoApp.Core\TodoApp.Core.fsproj" />
+  </ItemGroup>
+
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

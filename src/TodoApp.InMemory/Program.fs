@@ -1,39 +1,45 @@
-﻿module NewTodo.Program
+﻿module TodoApp.InMemory.Program
 
 open System
 
 open TodoApp.Core
 
-open NewTodo.Store
+open TodoApp.InMemory.Store
 
-let rec todLoop (store: ITodoStore) =
-    let command = Console.ReadLine()
+let rec todoLoopAsync (store: ITodoStore) =
+    async {
+        let command = Console.ReadLine()
 
-    match command with
-    | Help ->
-        help()
-        todLoop store
-    | Add a ->
-        add store a |> ignore
-        todLoop store
-    | Get g ->
-        get store g |> printfn "%A"
-        todLoop store
-    | ListAll a ->
-        getAll store |> printfn "%A"
-        todLoop store
-    | Clean c ->
-        clean store
-        todLoop store
-    | Toggle t ->
-        toggle store t |> ignore
-        todLoop store
-    | Exit e -> exit(0)
-    | _ -> todLoop store
+        match command with
+        | Help ->
+            help()
+            return! todoLoopAsync store
+        | Add a ->
+            do! addAsync store a |> Async.Ignore
+            return! todoLoopAsync store
+        | Get g ->
+            let! gotItem = getAsync store g
+            printfn "%A" gotItem
+            return! todoLoopAsync store
+        | ListAll a ->
+            let! allItems = getAllAsync store
+            printfn "%A" allItems
+            return! todoLoopAsync store
+        | Clean c ->
+            do! cleanAsync store
+            return! todoLoopAsync store
+        | Toggle t ->
+            do! toggleAsync store t |> Async.Ignore
+            return! todoLoopAsync store
+        | Exit e -> exit(0)
+        | _ -> return! todoLoopAsync store
+    }
 
 [<EntryPoint>]
 let main args =
-    let store = new TodoStore()
-    help()
-    todLoop store
-    0
+    async {
+        let store = new TodoStore()
+        help()
+        do! todoLoopAsync store  //This may require a new list
+        return 0
+    } |> Async.RunSynchronously
