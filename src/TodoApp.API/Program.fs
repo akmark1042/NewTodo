@@ -15,7 +15,7 @@ open Serilog
 open TodoApp.Core
 open TodoApp.API.Http.Routes
 open TodoApp.DataAccess.Database
-open TodoApp.TodoDbStore
+open TodoApp.TodoDb.Store
 open FSharp.Data.Sql
 
 // ---------------------------------

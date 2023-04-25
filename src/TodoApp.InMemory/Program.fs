@@ -40,6 +40,6 @@ let main args =
     async {
         let store = new TodoStore()
         help()
-        do! todoLoopAsync store  //This may require a new list
+        do! todoLoopAsync store
         return 0
     } |> Async.RunSynchronously
