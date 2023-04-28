@@ -1,0 +1,8 @@
+FSharp.Core
+FSharp.Data
+Giraffe
+Serilog
+Serilog.AspNetCore
+Serilog.Sinks.ElasticSearch
+Serilog.Enrichers.Environment
+System.Text.Json

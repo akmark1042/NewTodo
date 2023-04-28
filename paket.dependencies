@@ -4,6 +4,7 @@ source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core
 nuget FSharp.Data
+nuget RabbitMQ.Client
 nuget SQLProvider
 nuget npgsql ~> 6
 nuget Microsoft.Extensions.Logging

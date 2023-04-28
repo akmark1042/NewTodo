@@ -1,4 +1,4 @@
-module TodoApp.TodoDb.Store
+module TodoApp.TodoApi.Store
 
 open System
 

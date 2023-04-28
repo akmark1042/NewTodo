@@ -17,6 +17,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TodoApp.Api", "src\TodoApp.
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TodoApp.DataAccess", "src\TodoApp.DataAccess\TodoApp.DataAccess.fsproj", "{6B135EE9-2B63-43F6-AC11-4483ADDE580F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TodoApp.Client", "src\Todoapp.Client\TodoApp.Client.fsproj", "{D232BDC0-F307-4958-BE1B-4334486CBCF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{6B135EE9-2B63-43F6-AC11-4483ADDE580F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B135EE9-2B63-43F6-AC11-4483ADDE580F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B135EE9-2B63-43F6-AC11-4483ADDE580F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D232BDC0-F307-4958-BE1B-4334486CBCF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D232BDC0-F307-4958-BE1B-4334486CBCF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D232BDC0-F307-4958-BE1B-4334486CBCF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D232BDC0-F307-4958-BE1B-4334486CBCF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,5 +64,6 @@ Global
 		{6478375B-5FEF-4CD9-9219-694D553963DF} = {71E51E08-4002-4D20-AD4D-FE5F1E399D6E}
 		{CE209D1D-A9A0-4120-B388-96F5DF83136F} = {71E51E08-4002-4D20-AD4D-FE5F1E399D6E}
 		{6B135EE9-2B63-43F6-AC11-4483ADDE580F} = {71E51E08-4002-4D20-AD4D-FE5F1E399D6E}
+		{D232BDC0-F307-4958-BE1B-4334486CBCF7} = {71E51E08-4002-4D20-AD4D-FE5F1E399D6E}
 	EndGlobalSection
 EndGlobal

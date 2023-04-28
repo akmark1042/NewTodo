@@ -6,9 +6,10 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Types.fs" />
     <Compile Include="Http\Handlers.fs" />
     <Compile Include="Http\Routes.fs" />
-    <Compile Include="TodoDbStore.fs" />
+    <Compile Include="TodoApiStore.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

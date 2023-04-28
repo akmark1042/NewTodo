@@ -15,7 +15,7 @@ open Serilog
 open TodoApp.Core
 open TodoApp.API.Http.Routes
 open TodoApp.DataAccess.Database
-open TodoApp.TodoDb.Store
+open TodoApp.TodoApi.Store
 open FSharp.Data.Sql
 
 // ---------------------------------
@@ -122,4 +122,5 @@ let main args =
         |> useSerilogRequestLogging
         |> useGiraffe
         |> run
+    
     0
