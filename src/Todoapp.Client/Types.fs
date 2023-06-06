@@ -1,48 +1,11 @@
-[<AutoOpen>]
-module TodoApp.Core.Types
+module TodoApp.Client.Types
 
 open System
 
-[<CLIMutable>]
-type TodoConfig =
-    {
-        Token: string
-    }
-
-[<CLIMutable>]
-type ConnectionStrings =
-    {
-        TodoDb : string
-    }
-
-[<CLIMutable>]
-type RootDbConfig =
-    {
-        ConnectionStrings : ConnectionStrings
-        NewTodo : TodoConfig
-    }
-
-//////////
-
-[<CLIMutable>]
-type RbConnection =
-    {
-        HostName : string
-        VirtualHost : string
-        Username : string
-        Password : string
-    }
-
-[<CLIMutable>]
-type ConnectionStoreConfig =
-    {
-        DefaultConnection: RbConnection
-    }
-
-[<CLIMutable>]
-type RootRbConfig =
-    {
-        RabbitMQConnectionStore : ConnectionStoreConfig
+type JsonItem = {
+        Id: Guid
+        Label: string
+        CompletedDate: DateTimeOffset Nullable
     }
 
 type IncompleteItem = {
@@ -60,9 +23,9 @@ type TodoItem =
     | Complete of CompleteItem
     | Incomplete of IncompleteItem
 
-type ToggleError =
-    | ItemNotFound of Guid
-    | IndexNotFound of int
+type NewItem = {
+    Label: string
+}
 
 //Partial active patterns
 let (|Help|_|) (command: string) =
@@ -115,13 +78,6 @@ let (|Toggle|_|) (command: string) =
         | false, _ -> None
     | _ -> None
 
-[<RequireQualifiedAccess>]
-module TodoItem =
-    let getId (todo:TodoItem) : Guid =
-         match todo with
-         | Complete x -> x.Id
-         | Incomplete x -> x.Id
-
 let help() =
     printfn "Type 'add' (name) to add an item."
     printfn "Type 'get' # (number) to retrieve an item."
@@ -130,4 +86,3 @@ let help() =
     printfn "Type 'toggle' # to indicate item completion."
     printfn "Type 'exit' to end the program."
     printfn "Type an instruction: "
-    

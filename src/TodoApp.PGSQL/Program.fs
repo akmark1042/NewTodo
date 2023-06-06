@@ -39,9 +39,9 @@ let run (host: IHost) = host.Run()
 let withServices bldr =
     bldr |> configureServices (fun context services ->
         services
-            .Configure<RootConfig>(context.Configuration)
+            .Configure<RootDbConfig>(context.Configuration)
             .AddScoped<TodoDb.dataContext>(fun provider ->
-                let config = provider.GetRequiredService<IOptions<RootConfig>>()
+                let config = provider.GetRequiredService<IOptions<RootDbConfig>>()
                 TodoDb.GetDataContext(config.Value.ConnectionStrings.TodoDb, selectOperations = SelectOperations.DatabaseSide)
             )
             .AddScoped<ITodoStore,TodoStore>()

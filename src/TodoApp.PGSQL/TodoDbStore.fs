@@ -38,12 +38,11 @@ type TodoStore (context:TodoDb.dataContext) =
                     |> Seq.executeQueryAsync
                     |> Async.AwaitTask
 
-                return result |> Seq.map TodoItem.ofRow |> Seq.toList
-            }
+                return result |> Seq.map TodoItem.ofRow |> Seq.toList }
                     
         member this.cleanAsync() =
-            let cleanedList() = async {
-                let! result = 
+            async {
+                let! result =
                     query {
                         for row in context.Public.Todo do
                         where (row.CompletedOn <> None)
@@ -53,11 +52,9 @@ type TodoStore (context:TodoDb.dataContext) =
                     |> Async.Ignore
 
                 return result }
-
-            cleanedList()
                     
         member this.toggleAsync id =
-            let toggled() = async {
+            async {
                 let theRow =
                     query {
                         for row in context.Public.Todo do
@@ -79,11 +76,9 @@ type TodoStore (context:TodoDb.dataContext) =
                         None
                     | None -> ToggleError.ItemNotFound id |> Some
                 return result }
-            
-            toggled()
                         
         member this.addAsync name =
-            let newAdd() = async {
+            async {
                 let newRow = context.Public.Todo.Create()
                 newRow.Label <- name
 
@@ -96,11 +91,9 @@ type TodoStore (context:TodoDb.dataContext) =
                     }
                     |> Incomplete
                 return result }
-            
-            newAdd()
         
         member this.getAsync id =
-            let byId() = async {
+            async {
                 let! result =
                     query {
                         for row in context.Public.Todo do
@@ -111,10 +104,8 @@ type TodoStore (context:TodoDb.dataContext) =
 
                 return result |> Option.map TodoItem.ofRow }
 
-            byId()
-
         member this.getByIndexAsync id =
-            let byIndex() = async {
+            async {
                 let allList =
                     query {
                         for row in context.Public.Todo do
@@ -125,6 +116,4 @@ type TodoStore (context:TodoDb.dataContext) =
 
                 let result = allList |> List.tryItem id
                 
-                return result}
-            
-            byIndex()
+                return result }

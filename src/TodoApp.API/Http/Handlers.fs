@@ -1,13 +1,15 @@
 module TodoApp.API.Http.Handlers
 
+open System
+open Microsoft.Extensions.Primitives
 open Microsoft.AspNetCore.Http
 
 open FSharp.Control.TaskBuilder
+
 open Giraffe
 
 open TodoApp.Core
 open TodoApp.API
-open System
 
 module ReturnItem =
     let ofTodoItem (item:TodoItem) =
@@ -41,21 +43,20 @@ let handleNewTodo =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let store = ctx.GetService<ITodoStore>()
         let! body = ctx.BindJsonAsync<NewTodo>()
-        let! result = store.addAsync body.Label
-        
-        //error handling for incorrect data passed intoo the body
-        //Use Giraffe Model validation
+        let! result = addAsync store body.Label
 
-        //ctx.Response.Headers.Location ""
-        ctx.SetStatusCode 201
-        return! json result next ctx
+        match body.HasErrors() with
+        | Some errors -> return! (RequestErrors.BAD_REQUEST errors next ctx)
+        | _ ->
+            ctx.SetStatusCode 201
+            return! json result next ctx
     }
 
 let handleGetOneByIndex (id:int) =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let store = ctx.GetService<ITodoStore>()
 
-        let! mItem = store.getByIndexAsync id
+        let! mItem = getAsync store id
         match mItem with
         | None ->
             ctx.SetStatusCode 404
@@ -68,7 +69,7 @@ let handleGetOneByIndex (id:int) =
 let handleListAll =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let store = ctx.GetService<ITodoStore>()
-        let! result = store.getAllAsync()
+        let! result = getAllAsync store
 
         return! json (result |> Seq.map ReturnItem.ofTodoItem |> Seq.toList) next ctx
     }
@@ -76,24 +77,32 @@ let handleListAll =
 let handleRemoveCompleted =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let store = ctx.GetService<ITodoStore>()
-        do! store.cleanAsync()
+
+        do! cleanAsync store
 
         ctx.SetStatusCode 204
         return! next ctx
     }
 
-let handleToggleByGuid (id:Guid) =
+let handleToggleByIndex (idx:int) =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let store = ctx.GetService<ITodoStore>()
         
-        let! mItem = store.getAsync id
-        match mItem with
+        let! mError = toggleAsync store idx
+        match mError with
         | None ->
-            ctx.SetStatusCode 404
-            return! next ctx
-        | Some todoItem ->
-            do! todoItem |> TodoItem.getId |> store.toggleAsync |> Async.Ignore
-            let opnTogErr = todoItem |> TodoItem.getId |> store.toggleAsync
             ctx.SetStatusCode 200
-            return! json opnTogErr next ctx
+            return! next ctx
+        | Some error ->
+            let et =
+                match error with
+                | ToggleError.IndexNotFound i -> ErrorType.IndexNotFound i
+                | ToggleError.ItemNotFound id -> ErrorType.ItemNotFound id
+                
+            let result = et |> ErrorType.toErrorResult
+            result.Status |> ctx.SetStatusCode
+
+            ctx.Response.Headers.ContentType <- StringValues "application/problem+json"
+
+            return! json result next ctx
     }

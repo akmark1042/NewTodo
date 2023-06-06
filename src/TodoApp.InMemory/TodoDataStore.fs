@@ -9,18 +9,17 @@ type TodoStore () =
     let mutable data = []
     interface ITodoStore with       
         member this.addAsync name =
-            let newAdd() = async {
+            async {
                 let newItem = List.append data [ Incomplete {
                         Id = Guid.NewGuid()
                         Label = name
                     }]
                 data <- newItem
-                return newItem.Head }
-            
-            newAdd()
+                return newItem.Head
+            }
 
         member this.toggleAsync id =
-            let toggled() = async {
+            async {
                 let result = 
                     let mIndex = (List.tryFindIndex (fun x -> TodoItem.getId x = id) data)
                     
@@ -46,37 +45,26 @@ type TodoStore () =
                 
                 return result
             }
-
-            toggled()
         
         member this.getAllAsync() =
-            let wholeList() = async {
-                return data
-            }
-
-            wholeList()
+            async { return data }
         
         member this.getAsync id =
-            let byId() = async {
+            async {
                 return List.tryFind (fun x -> TodoItem.getId x = id) data
             }
 
-            byId()
-
         member this.getByIndexAsync id =
-            let byIndex() = async {
+            async {
                 return data |> List.tryItem id
             }
-            
-            byIndex()
-        
+                    
         member this.cleanAsync() =
-            let cleanedList() = async {
+            async {
                 data <- data |> List.filter (fun c -> 
                     match c with
                     | Complete c -> false
                     | Incomplete c -> true
-                )}
-
-            cleanedList()
-            
+                )
+            }
+           

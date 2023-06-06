@@ -46,7 +46,7 @@ type TodoCsvStore (path: string) =
 
     interface ITodoStore with
         member this.addAsync name =
-            let newAdd() = async {
+            async {
                 let result = 
                     let newToDoItem = Todos.Row(Guid.NewGuid(), name, None)
                     let myCSVwithExtraRows = loadFile().Append [ newToDoItem ]
@@ -54,11 +54,9 @@ type TodoCsvStore (path: string) =
                     newToDoItem |> TodoItem.ofRow
                 
                 return result }
-
-            newAdd()
         
         member this.toggleAsync id =
-            let toggled() = async {
+            async {
                 let result =
                     let items = loadFile()
 
@@ -83,35 +81,29 @@ type TodoCsvStore (path: string) =
 
                 return result }
 
-            toggled()
-
         member this.getAllAsync() =
-            let wholeList() = async {
+            async {
                 return loadFile().Rows
                 |> Seq.toList
-                |> List.map TodoItem.ofRow }
-
-            wholeList()
+                |> List.map TodoItem.ofRow
+            }
                     
         member this.cleanAsync() =
-            let cleanedList() = async {
+            async {
                 let listToClean = loadFile().Rows |> Seq.filter (fun row -> row.Date = None) |> (fun t -> new Todos(t))
-                saveFile listToClean }
-
-            cleanedList()
+                saveFile listToClean
+            }
 
         member this.getAsync id =
-            let byId() = async {
+            async {
                 return loadFile().Rows
                 |> Seq.tryFind (fun row -> row.Id = id)
-                |> Option.map TodoItem.ofRow }
-            
-            byId()
-            
+                |> Option.map TodoItem.ofRow
+            }
+                        
         member this.getByIndexAsync id =
-            let byIndex() = async {
+            async {
                 return loadFile().Rows
                 |> Seq.tryItem id
-                |> Option.map TodoItem.ofRow }
-            
-            byIndex()
+                |> Option.map TodoItem.ofRow
+            }

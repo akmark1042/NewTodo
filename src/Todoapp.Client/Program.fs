@@ -3,44 +3,53 @@
 open System
 open Microsoft.Extensions.Logging
 
-open TodoApp.Core
-open TodoApp.Client.Store
+open TodoApp.Client.Types
+open TodoApp.Client.ApiClient
 
-let rec todoLoopAsync (store: ITodoStore) =
+let printTodoItem (idx:int) (item:TodoItem) =
+    let (c, label) =
+        match item with
+        | Complete d -> ('x', d.Label)
+        | Incomplete d -> (' ', d.Label)
+    
+    printfn " %i. [%c] %s" idx c label
+ 
+let rec todoLoopAsync() =
     async {
         let command = Console.ReadLine()
 
         match command with
         | Help ->
             help()
-            return! todoLoopAsync store
+            return! todoLoopAsync()
         | Add a ->
-            do! addAsync store a |> Async.Ignore
-            return! todoLoopAsync store
+            do! addAsync a |> Async.Ignore
+            return! todoLoopAsync()
         | Get g ->
-            let! gotItem = getAsync store g
-            printfn "%A" gotItem
-            return! todoLoopAsync store
-        | ListAll a ->
-            let! allItems = getAllAsync store
-            printfn "%A" allItems
-            return! todoLoopAsync store
-        | Clean c ->
-            do! cleanAsync store
-            return! todoLoopAsync store
+            let! gotItem = getAsync g
+            match gotItem with
+            | Some i -> printTodoItem g i
+            | None -> printfn "None"
+            return! todoLoopAsync()
+        | ListAll _ ->
+            let! allItems = getAllAsync()
+            allItems |> List.iteri printTodoItem
+            return! todoLoopAsync()
+        | Clean _ ->
+            do! cleanAsync()
+            return! todoLoopAsync()
         | Toggle t ->
-            do! toggleAsync store t |> Async.Ignore
-            return! todoLoopAsync store
+            do! toggleAsync t |> Async.Ignore
+            return! todoLoopAsync()
         | Exit e -> exit(0)
-        | _ -> return! todoLoopAsync store
+        | _ -> return! todoLoopAsync()
     }
 
 [<EntryPoint>]
 let main args =
     async {
-        let store = new TodoStore("http://localhost:5000/api/v1/todos")
         help()
-        do! todoLoopAsync store
+        do! todoLoopAsync()
         return 0
     } |> Async.RunSynchronously
     

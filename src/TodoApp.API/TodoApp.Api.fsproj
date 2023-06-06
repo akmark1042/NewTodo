@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="Http\Auth.fs" />
     <Compile Include="Http\Handlers.fs" />
     <Compile Include="Http\Routes.fs" />
     <Compile Include="TodoApiStore.fs" />
